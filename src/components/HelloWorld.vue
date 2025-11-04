@@ -1,58 +1,104 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+  <div id="app" class="container">
+    <h1>Random Quote Generator</h1>
+    <br />
+
+    <!-- Display the quote or a loading message -->
+    <h2 v-if="loading">Loading...</h2>
+    <h2 v-else>
+      "{{ quote }}" <br /><br />
+      - {{ author }}
+    </h2>
+
+    <!-- The button that triggers the API call -->
+    <button @click="getQuote">Get New Quote</button>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
+  name: "App",
+
+  data() {
+    return {
+      quote: "", //stores the quote text
+      author: "", //store the author name
+      loading: false, //tracks laoding status
+    };
+  },
+
+  methods: {
+    async getQuote() {
+      this.loading = true;
+      try {
+        //Send a GET request to the Quotable API
+        const response = await axios.get(
+          "https://quotes15.p.rapidapi.com/quotes/random/?language_code=en",
+          {
+            headers: {
+              "x-rapidapi-host": "quotes15.p.rapidapi.com",
+              "x-rapidapi-key":
+                "2b5988ae99msh3342f28de56f493p15c1b0jsna94a1c445e94",
+            },
+          }
+        );
+
+        //Update the quote with the response data
+        this.quote = response.data.content;
+        this.author = response.data.originator.name;
+        //console.log(response);
+      } catch (error) {
+        console.error("Error fetching quote:", error);
+        this.quote = "Oops! Something went wrong.";
+        this.author = "";
+      } finally {
+        this.loading = false;
+      }
+    },
+  },
+
+  mounted() {
+    //Load a random quote when the app first starts
+    this.getQuote();
+  },
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.container {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  margin: 50px auto;
+  background-color: #cec2eb;
+  width: 60%;
+  padding: 2em;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+h1 {
+  font-weight: 700;
 }
-a {
-  color: #42b983;
+
+button {
+  margin-top: 30px;
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: aquamarine;
+  border-color: aquamarine;
+  font-weight: 700;
+}
+.author {
+  font-style: italic;
+  color: #555;
+  margin-top: 5px;
 }
 </style>
